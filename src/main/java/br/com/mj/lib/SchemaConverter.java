@@ -78,19 +78,19 @@ public class SchemaConverter {
         return this;
     }
 
-    public SchemaConverter convert(OutputStream output) throws IOException {
-        return convert(new OutputStreamWriter(output));
+    public SchemaConverter convert(OutputStream output, InfoPlus infoPlus) throws IOException {
+        return convert(new OutputStreamWriter(output), infoPlus);
     }
 
-    public SchemaConverter convert(Writer writer) throws IOException {
-        mapper.writeValue(writer, convert());
+    public SchemaConverter convert(Writer writer, InfoPlus infoPlus) throws IOException {
+        mapper.writeValue(writer, convert(infoPlus));
 
         return this;
     }
 
-    public OpenAPI convert() throws IOException {
+    public OpenAPI convert(InfoPlus infoPlus) throws IOException {
         Schema protoSchema = loader.load();
-        return ModelConverter.convert(protoSchema);
+        return ModelConverter.convert(protoSchema, infoPlus);
     }
 
     private ObjectMapper createMapper() {

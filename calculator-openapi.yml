@@ -1,5 +1,13 @@
 ---
 openapi: "3.0.1"
+info:
+  title: "Teste gRPC"
+  description: "Somente para testes"
+  version: "1.44.0"
+servers:
+- url: "https://api.itau.com.br/demo_nova_esteira/v1"
+tags:
+- name: "microsservicos"
 paths:
   /calculator.CalculatorService/sum:
     post:

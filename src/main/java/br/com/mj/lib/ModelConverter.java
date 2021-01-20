@@ -19,11 +19,14 @@ package br.com.mj.lib;
 import com.google.common.collect.ImmutableMap;
 import com.squareup.wire.schema.*;
 import io.swagger.v3.oas.models.*;
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.tags.Tag;
 import lombok.val;
 
 import java.util.AbstractMap;
@@ -47,187 +50,190 @@ import static com.squareup.wire.schema.ProtoType.*;
  * schemas along the way.
  */
 public class ModelConverter {
-  private static final String JSON_BOOLEAN = "boolean";
-  private static final String JSON_STRING = "string";
-  private static final String JSON_NUMBER = "number";
-  private static final String JSON_OBJECT = "object";
-  private static final String JSON_ARRAY = "array";
+    private static final String JSON_BOOLEAN = "boolean";
+    private static final String JSON_STRING = "string";
+    private static final String JSON_NUMBER = "number";
+    private static final String JSON_OBJECT = "object";
+    private static final String JSON_ARRAY = "array";
 
-  private static final ImmutableMap<ProtoType, String> SCALAR_TYPES =
-      ImmutableMap.<ProtoType, String>builder()
-          .put(BOOL, JSON_BOOLEAN)
-          .put(BYTES, JSON_STRING)
-          .put(DOUBLE, JSON_NUMBER)
-          .put(FLOAT, JSON_NUMBER)
-          .put(FIXED32, JSON_NUMBER)
-          .put(FIXED64, JSON_STRING)
-          .put(INT32, JSON_NUMBER)
-          .put(INT64, JSON_STRING)
-          .put(SFIXED32, JSON_NUMBER)
-          .put(SFIXED64, JSON_STRING)
-          .put(SINT32, JSON_NUMBER)
-          .put(SINT64, JSON_STRING)
-          .put(STRING, JSON_STRING)
-          .put(UINT32, JSON_NUMBER)
-          .put(UINT64, JSON_STRING)
-          .build();
+    private static final ImmutableMap<ProtoType, String> SCALAR_TYPES =
+            ImmutableMap.<ProtoType, String>builder()
+                    .put(BOOL, JSON_BOOLEAN)
+                    .put(BYTES, JSON_STRING)
+                    .put(DOUBLE, JSON_NUMBER)
+                    .put(FLOAT, JSON_NUMBER)
+                    .put(FIXED32, JSON_NUMBER)
+                    .put(FIXED64, JSON_STRING)
+                    .put(INT32, JSON_NUMBER)
+                    .put(INT64, JSON_STRING)
+                    .put(SFIXED32, JSON_NUMBER)
+                    .put(SFIXED64, JSON_STRING)
+                    .put(SINT32, JSON_NUMBER)
+                    .put(SINT64, JSON_STRING)
+                    .put(STRING, JSON_STRING)
+                    .put(UINT32, JSON_NUMBER)
+                    .put(UINT64, JSON_STRING)
+                    .build();
 
-  private final Schema protoSchema;
-  private final Map<String, io.swagger.v3.oas.models.media.Schema> oaSchemas =
-      new LinkedHashMap<>();
+    private final Schema protoSchema;
+    private final Map<String, io.swagger.v3.oas.models.media.Schema> oaSchemas =
+            new LinkedHashMap<>();
 
-  private ModelConverter(Schema protoSchema) {
-    this.protoSchema = protoSchema;
-  }
-
-  /**
-   * Convert protobuf 3 schema object to OpenAPI schema object.
-   *
-   * @param protoSchema protobuf schema object
-   * @return a converted OpenAPI schema object
-   */
-  public static OpenAPI convert(Schema protoSchema) {
-    return new ModelConverter(protoSchema).convert();
-  }
-
-  private OpenAPI convert() {
-    OpenAPI oa = new OpenAPI();
-    Paths paths = new Paths();
-
-    // Loop through each proto file, converting each rpc to a path
-    protoSchema
-        .protoFiles()
-        .stream()
-        .flatMap(this::rpcToPaths)
-        .forEach(entry -> paths.addPathItem(entry.getKey(), entry.getValue()));
-
-    // oaSchemas should have been populated while resolving rpc calls above.
-    // TODO: validate that we have at least one schema.
-    Components components = new Components().schemas(oaSchemas);
-
-    oa.paths(paths);
-    oa.components(components);
-
-    return oa;
-  }
-
-  private Stream<Map.Entry<String, PathItem>> rpcToPaths(final ProtoFile file) {
-    return file.services().stream().flatMap(service -> rpcToPaths(file, service));
-  }
-
-  private Stream<Map.Entry<String, PathItem>> rpcToPaths(
-      final ProtoFile file, final Service service) {
-    return service.rpcs().stream().map(rpc -> rpcToPath(file, service, rpc));
-  }
-
-  private Map.Entry<String, PathItem> rpcToPath(
-      final ProtoFile file, final Service service, final Rpc rpc) {
-    String path = String.format("/%s.%s/%s", file.packageName(), service.name(), rpc.name());
-    PathItem pathItem = new PathItem().post(rpcToOperation(file, service, rpc));
-    return new AbstractMap.SimpleImmutableEntry<>(path, pathItem);
-  }
-
-  private Operation rpcToOperation(final ProtoFile file, final Service service, final Rpc rpc) {
-    String operationId = String.format("%s.%s.%s", file.packageName(), service.name(), rpc.name());
-    String summary = spacify(rpc.name());
-    RequestBody requestBody = new RequestBody().content(typeToContent(rpc.requestType()));
-    ApiResponse response = new ApiResponse().content(typeToContent(rpc.responseType()));
-    ApiResponses responses = new ApiResponses().addApiResponse("200", response);
-    return new Operation()
-        .description(rpc.documentation())
-        .operationId(operationId)
-        .summary(summary)
-        .requestBody(requestBody)
-        .responses(responses);
-  }
-
-  private Content typeToContent(final ProtoType type) {
-    return new Content()
-        .addMediaType("application/json", typeToJsonMediaType(type))
-        .addMediaType("application/protobuf", typeToProtoMediaType(type));
-  }
-
-  private MediaType typeToJsonMediaType(final ProtoType type) {
-    return new MediaType().schema(typeToSchema(type));
-  }
-
-  private MediaType typeToProtoMediaType(final ProtoType type) {
-    // TODO: this is a stopgap.  need a better way to represent binary.
-    return new MediaType()
-        .schema(
-            new io.swagger.v3.oas.models.media.Schema<>()
-                .name(type.simpleName())
-                .type(JSON_OBJECT));
-  }
-
-  private io.swagger.v3.oas.models.media.Schema typeToSchema(final ProtoType type) {
-    io.swagger.v3.oas.models.media.Schema schema = new io.swagger.v3.oas.models.media.Schema<>().name(type.simpleName());
-
-    if (type.isScalar()) {
-      return schema.type(scalarType(type)).format(scalarFormat(type));
+    private ModelConverter(Schema protoSchema) {
+        this.protoSchema = protoSchema;
     }
-    if (type.isMap()) {
-      return schema.type(JSON_OBJECT);
+
+    /**
+     * Convert protobuf 3 schema object to OpenAPI schema object.
+     *
+     * @param protoSchema protobuf schema object
+     * @return a converted OpenAPI schema object
+     */
+    public static OpenAPI convert(Schema protoSchema, InfoPlus infoPlus) {
+        return new ModelConverter(protoSchema).convert(infoPlus);
     }
-    return schema.$ref(typeToRef(type));
-  }
 
-  private io.swagger.v3.oas.models.media.Schema fieldToSchema(final Field field) {
-    io.swagger.v3.oas.models.media.Schema schema = typeToSchema(field.type());
-    return schema.description(field.documentation());
-  }
+    private OpenAPI convert(InfoPlus infoPlus) {
+        OpenAPI oa = new OpenAPI();
+        Paths paths = new Paths();
 
-  private String typeToRef(final ProtoType type) {
-    String name = String.format("%s.%s", type.enclosingTypeOrPackage(), type.simpleName());
+        // Loop through each proto file, converting each rpc to a path
+        protoSchema
+                .protoFiles()
+                .stream()
+                .flatMap(this::rpcToPaths)
+                .forEach(entry -> paths.addPathItem(entry.getKey(), entry.getValue()));
 
-    if (!oaSchemas.containsKey(name)) {
-      Type objType = protoSchema.getType(type);
-      if (objType instanceof MessageType) {
-        oaSchemas.put(name, messageTypeToSchema((MessageType) objType));
-      } else if (objType instanceof EnumType) {
-        oaSchemas.put(name, enumTypeToSchema((EnumType) objType));
-      } else {
-        throw new IllegalArgumentException("Invalid proto type " + type);
-      }
+        // oaSchemas should have been populated while resolving rpc calls above.
+        // TODO: validate that we have at least one schema.
+        Components components = new Components().schemas(oaSchemas);
+
+        oa.info(infoPlus.getInfo());
+        oa.servers(infoPlus.getServersUrl().stream().map(url -> new Server().url(url)).collect(Collectors.toList()));
+        oa.tags(infoPlus.getTagsName().stream().map(tagName -> new Tag().name(tagName)).collect(Collectors.toList()));
+        oa.paths(paths);
+        oa.components(components);
+
+        return oa;
     }
-    return String.format("#/components/schemas/%s", name);
-  }
 
-  private io.swagger.v3.oas.models.media.Schema messageTypeToSchema(final MessageType type) {
-    return new io.swagger.v3.oas.models.media.Schema<>()
-        .description(type.documentation())
-        .type(JSON_OBJECT)
-        .required(type.getRequiredFields())
-        .properties(
-            type.fields().stream().collect(Collectors.toMap(Field::name, this::fieldToSchema)));
-  }
-
-  private io.swagger.v3.oas.models.media.Schema enumTypeToSchema(final EnumType type) {
-    io.swagger.v3.oas.models.media.Schema schema =
-        new io.swagger.v3.oas.models.media.Schema<>()
-            .description(type.documentation())
-            .type(JSON_STRING);
-    schema.setEnum(type.constants().stream().map(EnumConstant::name).collect(Collectors.toList()));
-    return schema;
-  }
-
-  private String scalarType(final ProtoType type) {
-    return SCALAR_TYPES.get(type);
-  }
-
-  private String scalarFormat(final ProtoType type) {
-    return type.simpleName();
-  }
-
-  private String spacify(String s) {
-    StringBuilder buffer = new StringBuilder();
-    for (int i = 0; i < s.length(); i++) {
-      char ch = s.charAt(i);
-      if (Character.isUpperCase(ch) && i > 0) {
-        buffer.append(" ");
-      }
-      buffer.append(ch);
+    private Stream<Map.Entry<String, PathItem>> rpcToPaths(final ProtoFile file) {
+        return file.services().stream().flatMap(service -> rpcToPaths(file, service));
     }
-    return buffer.toString();
-  }
+
+    private Stream<Map.Entry<String, PathItem>> rpcToPaths(
+            final ProtoFile file, final Service service) {
+        return service.rpcs().stream().map(rpc -> rpcToPath(file, service, rpc));
+    }
+
+    private Map.Entry<String, PathItem> rpcToPath(
+            final ProtoFile file, final Service service, final Rpc rpc) {
+        String path = String.format("/%s.%s/%s", file.packageName(), service.name(), rpc.name());
+        PathItem pathItem = new PathItem().post(rpcToOperation(file, service, rpc));
+        return new AbstractMap.SimpleImmutableEntry<>(path, pathItem);
+    }
+
+    private Operation rpcToOperation(final ProtoFile file, final Service service, final Rpc rpc) {
+        String operationId = String.format("%s.%s.%s", file.packageName(), service.name(), rpc.name());
+        String summary = spacify(rpc.name());
+        RequestBody requestBody = new RequestBody().content(typeToContent(rpc.requestType()));
+        ApiResponse response = new ApiResponse().content(typeToContent(rpc.responseType()));
+        ApiResponses responses = new ApiResponses().addApiResponse("200", response);
+        return new Operation()
+                .description(rpc.documentation())
+                .operationId(operationId)
+                .summary(summary)
+                .requestBody(requestBody)
+                .responses(responses);
+    }
+
+    private Content typeToContent(final ProtoType type) {
+        return new Content()
+                .addMediaType("application/json", typeToJsonMediaType(type))
+                .addMediaType("application/protobuf", typeToProtoMediaType(type));
+    }
+
+    private MediaType typeToJsonMediaType(final ProtoType type) {
+        return new MediaType().schema(typeToSchema(type));
+    }
+
+    private MediaType typeToProtoMediaType(final ProtoType type) {
+        // TODO: this is a stopgap.  need a better way to represent binary.
+        return new MediaType()
+                .schema(
+                        new io.swagger.v3.oas.models.media.Schema<>()
+                                .name(type.simpleName())
+                                .type(JSON_OBJECT));
+    }
+
+    private io.swagger.v3.oas.models.media.Schema typeToSchema(final ProtoType type) {
+        io.swagger.v3.oas.models.media.Schema schema = new io.swagger.v3.oas.models.media.Schema<>().name(type.simpleName());
+
+        if (type.isScalar()) {
+            return schema.type(scalarType(type)).format(scalarFormat(type));
+        }
+        if (type.isMap()) {
+            return schema.type(JSON_OBJECT);
+        }
+        return schema.$ref(typeToRef(type));
+    }
+
+    private io.swagger.v3.oas.models.media.Schema fieldToSchema(final Field field) {
+        io.swagger.v3.oas.models.media.Schema schema = typeToSchema(field.type());
+        return schema.description(field.documentation());
+    }
+
+    private String typeToRef(final ProtoType type) {
+        String name = String.format("%s.%s", type.enclosingTypeOrPackage(), type.simpleName());
+
+        if (!oaSchemas.containsKey(name)) {
+            Type objType = protoSchema.getType(type);
+            if (objType instanceof MessageType) {
+                oaSchemas.put(name, messageTypeToSchema((MessageType) objType));
+            } else if (objType instanceof EnumType) {
+                oaSchemas.put(name, enumTypeToSchema((EnumType) objType));
+            } else {
+                throw new IllegalArgumentException("Invalid proto type " + type);
+            }
+        }
+        return String.format("#/components/schemas/%s", name);
+    }
+
+    private io.swagger.v3.oas.models.media.Schema messageTypeToSchema(final MessageType type) {
+        return new io.swagger.v3.oas.models.media.Schema<>()
+                .description(type.documentation())
+                .type(JSON_OBJECT)
+                .required(type.getRequiredFields())
+                .properties(
+                        type.fields().stream().collect(Collectors.toMap(Field::name, this::fieldToSchema)));
+    }
+
+    private io.swagger.v3.oas.models.media.Schema enumTypeToSchema(final EnumType type) {
+        io.swagger.v3.oas.models.media.Schema schema =
+                new io.swagger.v3.oas.models.media.Schema<>()
+                        .description(type.documentation())
+                        .type(JSON_STRING);
+        schema.setEnum(type.constants().stream().map(EnumConstant::name).collect(Collectors.toList()));
+        return schema;
+    }
+
+    private String scalarType(final ProtoType type) {
+        return SCALAR_TYPES.get(type);
+    }
+
+    private String scalarFormat(final ProtoType type) {
+        return type.simpleName();
+    }
+
+    private String spacify(String s) {
+        StringBuilder buffer = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            if (Character.isUpperCase(ch) && i > 0) {
+                buffer.append(" ");
+            }
+            buffer.append(ch);
+        }
+        return buffer.toString();
+    }
 }

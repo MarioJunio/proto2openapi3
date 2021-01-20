@@ -16,8 +16,11 @@ dependencies {
     compile 'com.google.guava:guava:21.0'
     compile 'com.squareup.wire:wire-schema:2.2.0'
     compile 'io.swagger.core.v3:swagger-core:2.0.0-rc4'
-    compile 'org.projectlombok:lombok:1.16.20'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.4'
+
+    compileOnly 'org.projectlombok:lombok:1.18.16'
+    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+
 }
 
 test {

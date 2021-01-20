@@ -1,1 +1,343 @@
-{"openapi":"3.0.1","paths":{"/calculator.CalculatorService/sum":{"post":{"summary":"sum","operationId":"calculator.CalculatorService.sum","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.CalculatorRequest"}},"application/protobuf":{"schema":{"type":"object"}}}},"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.CalculatorResponse"}},"application/protobuf":{"schema":{"type":"object"}}}}}}},"/calculator.CalculatorService/subtract":{"post":{"summary":"subtract","operationId":"calculator.CalculatorService.subtract","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.CalculatorRequest"}},"application/protobuf":{"schema":{"type":"object"}}}},"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.CalculatorResponse"}},"application/protobuf":{"schema":{"type":"object"}}}}}}},"/calculator.CalculatorService/multiply":{"post":{"summary":"multiply","operationId":"calculator.CalculatorService.multiply","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.CalculatorRequest"}},"application/protobuf":{"schema":{"type":"object"}}}},"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.CalculatorResponse"}},"application/protobuf":{"schema":{"type":"object"}}}}}}},"/calculator.CalculatorService/division":{"post":{"summary":"division","operationId":"calculator.CalculatorService.division","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.CalculatorRequest"}},"application/protobuf":{"schema":{"type":"object"}}}},"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.CalculatorResponse"}},"application/protobuf":{"schema":{"type":"object"}}}}}}},"/calculator.CalculatorService/prime":{"post":{"summary":"prime","operationId":"calculator.CalculatorService.prime","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.PrimeRequest"}},"application/protobuf":{"schema":{"type":"object"}}}},"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.CalculatorResponse"}},"application/protobuf":{"schema":{"type":"object"}}}}}}},"/calculator.CalculatorService/avg":{"post":{"summary":"avg","operationId":"calculator.CalculatorService.avg","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.AverageRequest"}},"application/protobuf":{"schema":{"type":"object"}}}},"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.AverageResponse"}},"application/protobuf":{"schema":{"type":"object"}}}}}}},"/calculator.CalculatorService/findMaximum":{"post":{"summary":"find Maximum","operationId":"calculator.CalculatorService.findMaximum","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.MaximumRequest"}},"application/protobuf":{"schema":{"type":"object"}}}},"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/calculator.MaximumResponse"}},"application/protobuf":{"schema":{"type":"object"}}}}}}}},"components":{"schemas":{"calculator.CalculatorRequest":{"type":"object","properties":{"n1":{"type":"number","format":"double"},"n2":{"type":"number","format":"double"}}},"calculator.CalculatorResponse":{"type":"object","properties":{"result":{"type":"number","format":"double"}}},"calculator.PrimeRequest":{"type":"object","properties":{"prime":{"type":"number","format":"int32"}}},"calculator.AverageRequest":{"type":"object","properties":{"number":{"type":"number","format":"int32"}}},"calculator.AverageResponse":{"type":"object","properties":{"result":{"type":"number","format":"double"}}},"calculator.MaximumRequest":{"type":"object","properties":{"number":{"type":"number","format":"int32"}}},"calculator.MaximumResponse":{"type":"object","properties":{"response":{"type":"number","format":"int32"}}}}}}
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Teste gRPC",
+        "description": "Somente para testes",
+        "version": "1.44.0"
+    },
+    "servers": [
+        {
+            "url": "https://api.itau.com.br/demo_nova_esteira/v1"
+        }
+    ],
+    "tags": [
+        {
+            "name": "microsservicos"
+        }
+    ],
+    "paths": {
+        "/calculator.CalculatorService/sum": {
+            "post": {
+                "summary": "sum",
+                "operationId": "calculator.CalculatorService.sum",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/calculator.CalculatorRequest"
+                            }
+                        },
+                        "application/protobuf": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/calculator.CalculatorResponse"
+                                }
+                            },
+                            "application/protobuf": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/calculator.CalculatorService/subtract": {
+            "post": {
+                "summary": "subtract",
+                "operationId": "calculator.CalculatorService.subtract",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/calculator.CalculatorRequest"
+                            }
+                        },
+                        "application/protobuf": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/calculator.CalculatorResponse"
+                                }
+                            },
+                            "application/protobuf": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/calculator.CalculatorService/multiply": {
+            "post": {
+                "summary": "multiply",
+                "operationId": "calculator.CalculatorService.multiply",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/calculator.CalculatorRequest"
+                            }
+                        },
+                        "application/protobuf": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/calculator.CalculatorResponse"
+                                }
+                            },
+                            "application/protobuf": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/calculator.CalculatorService/division": {
+            "post": {
+                "summary": "division",
+                "operationId": "calculator.CalculatorService.division",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/calculator.CalculatorRequest"
+                            }
+                        },
+                        "application/protobuf": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/calculator.CalculatorResponse"
+                                }
+                            },
+                            "application/protobuf": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/calculator.CalculatorService/prime": {
+            "post": {
+                "summary": "prime",
+                "operationId": "calculator.CalculatorService.prime",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/calculator.PrimeRequest"
+                            }
+                        },
+                        "application/protobuf": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/calculator.CalculatorResponse"
+                                }
+                            },
+                            "application/protobuf": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/calculator.CalculatorService/avg": {
+            "post": {
+                "summary": "avg",
+                "operationId": "calculator.CalculatorService.avg",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/calculator.AverageRequest"
+                            }
+                        },
+                        "application/protobuf": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/calculator.AverageResponse"
+                                }
+                            },
+                            "application/protobuf": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/calculator.CalculatorService/findMaximum": {
+            "post": {
+                "summary": "find Maximum",
+                "operationId": "calculator.CalculatorService.findMaximum",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/calculator.MaximumRequest"
+                            }
+                        },
+                        "application/protobuf": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/calculator.MaximumResponse"
+                                }
+                            },
+                            "application/protobuf": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "calculator.CalculatorRequest": {
+                "type": "object",
+                "properties": {
+                    "n1": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "n2": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                }
+            },
+            "calculator.CalculatorResponse": {
+                "type": "object",
+                "properties": {
+                    "result": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                }
+            },
+            "calculator.PrimeRequest": {
+                "type": "object",
+                "properties": {
+                    "prime": {
+                        "type": "number",
+                        "format": "int32"
+                    }
+                }
+            },
+            "calculator.AverageRequest": {
+                "type": "object",
+                "properties": {
+                    "number": {
+                        "type": "number",
+                        "format": "int32"
+                    }
+                }
+            },
+            "calculator.AverageResponse": {
+                "type": "object",
+                "properties": {
+                    "result": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                }
+            },
+            "calculator.MaximumRequest": {
+                "type": "object",
+                "properties": {
+                    "number": {
+                        "type": "number",
+                        "format": "int32"
+                    }
+                }
+            },
+            "calculator.MaximumResponse": {
+                "type": "object",
+                "properties": {
+                    "response": {
+                        "type": "number",
+                        "format": "int32"
+                    }
+                }
+            }
+        }
+    }
+}
