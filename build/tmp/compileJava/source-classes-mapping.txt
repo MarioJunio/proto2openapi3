@@ -1,0 +1,5 @@
+br/com/mj/lib/ModelConverter.java
+ br.com.mj.lib.ModelConverter
+br/com/mj/lib/SchemaConverter.java
+ br.com.mj.lib.SchemaConverter
+ br.com.mj.lib.SchemaConverter$EXPORT_TYPE
